@@ -94,7 +94,7 @@ def main(args):
     if args.resume:
         if isfile(args.resume):
             print("=> loading checkpoint '{}'".format(args.resume))
-            checkpoint = torch.load(args.resume)
+            checkpoint = torch.load(args.resume, map_location=device)
             args.start_epoch = checkpoint['epoch']
             best_acc = checkpoint['best_acc']
             model.load_state_dict(checkpoint['state_dict'])

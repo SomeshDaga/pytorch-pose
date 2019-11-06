@@ -7,6 +7,9 @@ import scipy.misc
 
 from .misc import *
 
+# select proper device to run
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 def im_to_numpy(img):
     img = to_numpy(img)
     img = np.transpose(img, (1, 2, 0)) # H*W*C
@@ -165,7 +168,7 @@ def sample_with_heatmap(inp, out, num_rows=2, parts_to_show=None):
 
     return full_img
 
-def batch_with_heatmap(inputs, outputs, mean=torch.Tensor([0.5, 0.5, 0.5]).cuda(), num_rows=2, parts_to_show=None):
+def batch_with_heatmap(inputs, outputs, mean=torch.Tensor([0.5, 0.5, 0.5]).to(device), num_rows=2, parts_to_show=None):
     batch_img = []
     for n in range(min(inputs.size(0), 4)):
         inp = inputs[n] + mean.view(3, 1, 1).expand_as(inputs[n])

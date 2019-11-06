@@ -5,8 +5,8 @@ from __future__ import print_function
 from easydict import EasyDict as edict
 
 import torch
+from torch.utils import model_zoo
 import torch.nn as nn
-from torchvision.models.resnet import model_zoo
 from torchvision.models.resnet import model_urls
 from torchvision.models.resnet import BasicBlock, Bottleneck
 
