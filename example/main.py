@@ -23,6 +23,8 @@ import pose.models as models
 import pose.datasets as datasets
 import pose.losses as losses
 
+from pruning.methods import prune_conv2d
+
 
 # get model names and dataset names
 model_names = sorted(name for name in models.__dict__
@@ -97,7 +99,7 @@ def main(args):
             checkpoint = torch.load(args.resume, map_location=device)
             args.start_epoch = checkpoint['epoch']
             best_acc = checkpoint['best_acc']
-            model.load_state_dict(checkpoint['state_dict'])
+            model.load_state_dict(checkpoint['state_dict'], strict=False)
             optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.resume, checkpoint['epoch']))
@@ -137,7 +139,13 @@ def main(args):
 
     # train and eval
     lr = args.lr
-    for epoch in range(args.start_epoch, args.epochs):
+
+    # If working with a pre-trained model, prune it if required prior to training
+    # Note that this is one-shot pruning and not iterative pruning
+    if args.resume and args.prune and args.prune_rate != 0:
+        prune_conv2d(model, args.prune_rate)
+
+    for epoch in range(0, args.epochs):
         lr = adjust_learning_rate(optimizer, epoch, lr, args.schedule, args.gamma)
         print('\nEpoch: %d | LR: %.8f' % (epoch + 1, lr))
 
@@ -422,10 +430,14 @@ if __name__ == '__main__':
                         help='save models for every #snapshot epochs (default: 0)')
     parser.add_argument('--resume', default='', type=str, metavar='PATH',
                         help='path to latest checkpoint (default: none)')
+    parser.add_argument('--prune', dest='prune', action='store_true',
+                        help='prune the network')
     parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                         help='evaluate model on validation set')
     parser.add_argument('-d', '--debug', dest='debug', action='store_true',
                         help='show intermediate results')
+    parser.add_argument('--prune-rate', type=float, default=5.0,
+                        help='Prune rate (Default: 5%).')
 
 
     main(parser.parse_args())

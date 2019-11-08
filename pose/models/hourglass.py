@@ -6,6 +6,8 @@ Use lr=0.01 for current version
 import torch.nn as nn
 import torch.nn.functional as F
 
+from pruning.layers import MaskedConv2D
+
 # from .preresnet import BasicBlock, Bottleneck
 
 
@@ -18,12 +20,12 @@ class Bottleneck(nn.Module):
         super(Bottleneck, self).__init__()
 
         self.bn1 = nn.BatchNorm2d(inplanes)
-        self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=True)
+        self.conv1 = MaskedConv2D(inplanes, planes, kernel_size=1, bias=True)
         self.bn2 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
+        self.conv2 = MaskedConv2D(planes, planes, kernel_size=3, stride=stride,
                                padding=1, bias=True)
         self.bn3 = nn.BatchNorm2d(planes)
-        self.conv3 = nn.Conv2d(planes, planes * 2, kernel_size=1, bias=True)
+        self.conv3 = MaskedConv2D(planes, planes * 2, kernel_size=1, bias=True)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -101,7 +103,7 @@ class HourglassNet(nn.Module):
         self.inplanes = 64
         self.num_feats = 128
         self.num_stacks = num_stacks
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
+        self.conv1 = MaskedConv2D(3, self.inplanes, kernel_size=7, stride=2, padding=3,
                                bias=True)
         self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
@@ -117,10 +119,10 @@ class HourglassNet(nn.Module):
             hg.append(Hourglass(block, num_blocks, self.num_feats, 4))
             res.append(self._make_residual(block, self.num_feats, num_blocks))
             fc.append(self._make_fc(ch, ch))
-            score.append(nn.Conv2d(ch, num_classes, kernel_size=1, bias=True))
+            score.append(MaskedConv2D(ch, num_classes, kernel_size=1, bias=True))
             if i < num_stacks-1:
-                fc_.append(nn.Conv2d(ch, ch, kernel_size=1, bias=True))
-                score_.append(nn.Conv2d(num_classes, ch, kernel_size=1, bias=True))
+                fc_.append(MaskedConv2D(ch, ch, kernel_size=1, bias=True))
+                score_.append(MaskedConv2D(num_classes, ch, kernel_size=1, bias=True))
         self.hg = nn.ModuleList(hg)
         self.res = nn.ModuleList(res)
         self.fc = nn.ModuleList(fc)
@@ -132,7 +134,7 @@ class HourglassNet(nn.Module):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes, planes * block.expansion,
+                MaskedConv2D(self.inplanes, planes * block.expansion,
                           kernel_size=1, stride=stride, bias=True),
             )
 
@@ -146,7 +148,7 @@ class HourglassNet(nn.Module):
 
     def _make_fc(self, inplanes, outplanes):
         bn = nn.BatchNorm2d(inplanes)
-        conv = nn.Conv2d(inplanes, outplanes, kernel_size=1, bias=True)
+        conv = MaskedConv2D(inplanes, outplanes, kernel_size=1, bias=True)
         return nn.Sequential(
                 conv,
                 bn,
