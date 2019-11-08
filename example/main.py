@@ -42,7 +42,7 @@ best_acc = 0
 idx = []
 
 # select proper device to run
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cudnn.benchmark = True  # There is BN issue for early version of PyTorch
                         # see https://github.com/bearpaw/pytorch-pose/issues/33
 
@@ -71,6 +71,8 @@ def main(args):
                                        num_blocks=args.blocks,
                                        num_classes=njoints,
                                        resnet_layers=args.resnet_layers)
+
+    print(model.get_hg())
 
     model = torch.nn.DataParallel(model).to(device)
 
@@ -143,6 +145,9 @@ def main(args):
     # If working with a pre-trained model, prune it if required prior to training
     # Note that this is one-shot pruning and not iterative pruning
     if args.resume and args.prune and args.prune_rate != 0:
+        logger = Logger(join(args.checkpoint, 'log.txt'), title=title)
+        logger.set_names(['Epoch', 'LR', 'Train Loss', 'Val Loss',
+                          'Train Acc', 'Val Acc'])
         prune_conv2d(model, args.prune_rate)
 
     for epoch in range(0, args.epochs):

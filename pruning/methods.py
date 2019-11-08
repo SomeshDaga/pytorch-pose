@@ -25,7 +25,7 @@ def get_layer(model, name):
                 item = temp
     return item
 
-def prune_conv2d(model, pruning_percentage, prune_overall=True):
+def prune_conv2d(model, pruning_percentage, prune_overall=False):
     '''
     Prune conv2d layers one by one until the pruning_percentage is achieved
     (NOTE: We are not performing iterative pruning)

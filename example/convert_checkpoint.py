@@ -38,7 +38,7 @@ best_acc = 0
 idx = []
 
 # select proper device to run
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cudnn.benchmark = True  # There is BN issue for early version of PyTorch
                         # see https://github.com/bearpaw/pytorch-pose/issues/33
 

@@ -8,7 +8,7 @@ import scipy.misc
 from .misc import *
 
 # select proper device to run
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def im_to_numpy(img):
     img = to_numpy(img)

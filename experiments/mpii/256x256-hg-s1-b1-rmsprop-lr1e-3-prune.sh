@@ -1,14 +1,14 @@
-GPU=0
+GPU=0,1
 ARCH=hg
 DSET=mpii
-IMAGEPATH=/content/images  # set image path here
+IMAGEPATH=data/mpii/images  # set image path here
 ANNOPATH=data/mpii/mpii_annotations.json
 STACK=1
 BLOCK=1
 FEAT=256
-TRAINB=32
+TRAINB=96
 VALB=6
-LR=1e-3
+LR=1e-4
 WORKERS=8
 
 
@@ -30,5 +30,5 @@ CUDA_VISIBLE_DEVICES=${GPU} python example/main.py \
 --workers ${WORKERS} \
 --prune \
 --prune-rate 20 \
---resume ../pretrained/hourglass/hg_s1_b1/model_best.pth.tar \
+--resume ../pretrained-models/hourglass/mpii/hg_s1_b1/model_best.pth.tar \
 --epochs 220
